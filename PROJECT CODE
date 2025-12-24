@@ -1,0 +1,138 @@
+#include <iostream>
+#include <vector>
+#include <fstream>
+#include <limits>
+using namespace std;
+
+class Track {
+public:
+    string title;
+    string artist;
+    int duration;
+
+    Track(string t = "", string a = "", int d = 0) {
+        title = t;
+        artist = a;
+        duration = d;
+    }
+};
+
+class Playlist {
+private:
+    string name;
+    vector<Track> tracks;
+
+public:
+    Playlist(string n) {
+        name = n;
+    }
+
+    // Operator + : Add Track
+    Playlist& operator+(Track t) {
+        tracks.push_back(t);
+        cout << "Track added successfully!\n";
+        return *this;
+    }
+
+    // Operator - : Remove Track by title
+    Playlist& operator-(string title) {
+        bool found = false;
+        for (auto it = tracks.begin(); it != tracks.end(); it++) {
+            if (it->title == title) {
+                tracks.erase(it);
+                cout << "Track removed successfully!\n";
+                found = true;
+                break;
+            }
+        }
+        if (!found)
+            cout << "Track not found!\n";
+        return *this;
+    }
+
+    void display() {
+        cout << "\nPlaylist: " << name << endl;
+        if (tracks.empty()) {
+            cout << "No tracks available.\n";
+            return;
+        }
+
+        for (auto &t : tracks) {
+            cout << "Title: " << t.title
+                 << " | Artist: " << t.artist
+                 << " | Duration: " << t.duration << " sec\n";
+        }
+    }
+
+    void saveToFile() {
+        ofstream file("playlist.txt");
+        file << name << endl;
+        for (auto &t : tracks) {
+            file << t.title << "," << t.artist << "," << t.duration << endl;
+        }
+        file.close();
+        cout << "Playlist saved to file successfully!\n";
+    }
+};
+
+int main() {
+    string playlistName;
+    cout << "Enter Playlist Name: ";
+    getline(cin, playlistName);
+
+    Playlist playlist(playlistName);
+    int choice;
+
+    do {
+        cout << "\n===== MUSIC PLAYLIST MANAGER =====\n";
+        cout << "1. Add Track\n";
+        cout << "2. Remove Track\n";
+        cout << "3. Display Playlist\n";
+        cout << "4. Save Playlist to File\n";
+        cout << "5. Exit\n";
+        cout << "Enter your choice: ";
+        cin >> choice;
+
+        // Clear input buffer
+        cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+        if (choice == 1) {
+            string title, artist;
+            int duration;
+
+            cout << "Enter track title: ";
+            getline(cin, title);
+
+            cout << "Enter artist name: ";
+            getline(cin, artist);
+
+            cout << "Enter duration (seconds): ";
+            cin >> duration;
+            cin.ignore(numeric_limits<streamsize>::max(), '\n');
+
+            Track t(title, artist, duration);
+            playlist + t;
+        }
+        else if (choice == 2) {
+            string title;
+            cout << "Enter track title to remove: ";
+            getline(cin, title);
+            playlist - title;
+        }
+        else if (choice == 3) {
+            playlist.display();
+        }
+        else if (choice == 4) {
+            playlist.saveToFile();
+        }
+        else if (choice == 5) {
+            cout << "Exiting Playlist Manager...\n";
+        }
+        else {
+            cout << "Invalid choice!\n";
+        }
+
+    } while (choice != 5);
+
+    return 0;
+}
